@@ -3,18 +3,11 @@ import tensorflow as tf
 
 
 def load_and_preprocess_data():
-    """
-    Downloads MNIST (cached after first run) and returns train/test splits.
-    Pixels are normalized to [0.0, 1.0] and reshaped to (N, 28, 28, 1)
-    to satisfy Conv2D's expected channel dimension.
-    Labels stay as integers — sparse_categorical_crossentropy handles them directly.
-    """
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
     x_train = x_train.astype("float32") / 255.0
     x_test = x_test.astype("float32") / 255.0
 
-    # Add channel dimension: (N, 28, 28) -> (N, 28, 28, 1)
     x_train = x_train[..., tf.newaxis]
     x_test = x_test[..., tf.newaxis]
 
@@ -22,15 +15,6 @@ def load_and_preprocess_data():
 
 
 def build_model():
-    """
-    Returns a compiled CNN suited for MNIST digit classification.
-
-    Architecture:
-      Two convolutional blocks (32 then 64 filters) capture spatial features.
-      MaxPooling halves dimensions after each block, reducing parameter count.
-      Dense(128) + Dropout(0.5) gives capacity with regularisation.
-      Dense(10, softmax) outputs a probability for each digit 0-9.
-    """
     model = tf.keras.Sequential([
         tf.keras.layers.Input(shape=(28, 28, 1)),
 
@@ -71,10 +55,7 @@ def main():
         batch_size=128,
         validation_split=0.1,
         callbacks=[
-            tf.keras.callbacks.EarlyStopping(
-                patience=3,
-                restore_best_weights=True,
-            )
+            tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True)
         ],
     )
 
