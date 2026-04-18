@@ -1,11 +1,12 @@
 import tkinter as tk
 from PIL import Image, ImageDraw
-import numpy as np
-
 from predict import load_model, predict
+from utils.preprocessing import segment_characters
 
-CANVAS_SIZE = 280
+CANVAS_W = 560
+CANVAS_H = 280
 BRUSH_SIZE = 16
+
 
 class App:
     def __init__(self, root):
@@ -13,13 +14,13 @@ class App:
         self.root.title("Character Recognizer")
         self.root.resizable(False, False)
 
-        self.model = None  # loaded on first predict
+        self.model = None
 
-        self.pil_image = Image.new("L", (CANVAS_SIZE, CANVAS_SIZE), 0)
+        self.pil_image = Image.new("L", (CANVAS_W, CANVAS_H), 0)
         self.draw = ImageDraw.Draw(self.pil_image)
 
         self.canvas = tk.Canvas(
-            root, width=CANVAS_SIZE, height=CANVAS_SIZE,
+            root, width=CANVAS_W, height=CANVAS_H,
             bg="black", cursor="cross"
         )
         self.canvas.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
@@ -31,7 +32,7 @@ class App:
         clear_btn = tk.Button(root, text="Clear", command=self.clear, width=12)
         clear_btn.grid(row=1, column=1, pady=10)
 
-        self.result = tk.Label(root, text="Draw a digit or letter then press Predict", font=("Helvetica", 18))
+        self.result = tk.Label(root, text="Write a word then press Predict", font=("Helvetica", 22))
         self.result.grid(row=2, column=0, columnspan=2, pady=10)
 
     def paint(self, event):
@@ -46,18 +47,24 @@ class App:
             self.root.update()
             self.model = load_model()
 
-        img = self.pil_image.resize((28, 28), Image.LANCZOS)
-        arr = np.array(img, dtype="float32") / 255.0
-        arr = arr.reshape(1, 28, 28, 1)
+        chars = segment_characters(self.pil_image)
 
-        digit, confidence = predict(self.model, arr)
-        self.result.config(text=f"{digit}   ({confidence * 100:.1f}%)")
+        if not chars:
+            self.result.config(text="Nothing detected")
+            return
+
+        word = ""
+        for char_arr in chars:
+            label, _ = predict(self.model, char_arr)
+            word += label
+
+        self.result.config(text=word)
 
     def clear(self):
         self.canvas.delete("all")
-        self.pil_image = Image.new("L", (CANVAS_SIZE, CANVAS_SIZE), 0)
+        self.pil_image = Image.new("L", (CANVAS_W, CANVAS_H), 0)
         self.draw = ImageDraw.Draw(self.pil_image)
-        self.result.config(text="Draw a digit or letter then press Predict")
+        self.result.config(text="Write a word then press Predict")
 
 
 def main():

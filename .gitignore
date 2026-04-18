@@ -1,0 +1,6 @@
+data/
+model/
+.venv/
+__pycache__/
+*.pyc
+test_digit.png
