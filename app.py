@@ -7,11 +7,10 @@ from predict import load_model, predict
 CANVAS_SIZE = 280
 BRUSH_SIZE = 16
 
-
 class App:
     def __init__(self, root):
         self.root = root
-        self.root.title("Digit Recognizer")
+        self.root.title("Character Recognizer")
         self.root.resizable(False, False)
 
         self.model = None  # loaded on first predict
@@ -32,7 +31,7 @@ class App:
         clear_btn = tk.Button(root, text="Clear", command=self.clear, width=12)
         clear_btn.grid(row=1, column=1, pady=10)
 
-        self.result = tk.Label(root, text="Draw a digit then press Predict", font=("Helvetica", 18))
+        self.result = tk.Label(root, text="Draw a digit or letter then press Predict", font=("Helvetica", 18))
         self.result.grid(row=2, column=0, columnspan=2, pady=10)
 
     def paint(self, event):
@@ -58,7 +57,7 @@ class App:
         self.canvas.delete("all")
         self.pil_image = Image.new("L", (CANVAS_SIZE, CANVAS_SIZE), 0)
         self.draw = ImageDraw.Draw(self.pil_image)
-        self.result.config(text="Draw a digit then press Predict")
+        self.result.config(text="Draw a digit or letter then press Predict")
 
 
 def main():

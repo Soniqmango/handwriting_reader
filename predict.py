@@ -6,8 +6,9 @@ import tensorflow as tf
 
 from utils.preprocessing import preprocess_image
 
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "char_model.keras")
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "digit_model.keras")
+LABEL_NAMES = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt'
 
 
 def load_model(model_path=MODEL_PATH):
@@ -21,9 +22,10 @@ def load_model(model_path=MODEL_PATH):
 
 def predict(model, image_array):
     probabilities = model.predict(image_array, verbose=0)[0]
-    digit = int(np.argmax(probabilities))
-    confidence = float(probabilities[digit])
-    return digit, confidence
+    idx = int(np.argmax(probabilities))
+    confidence = float(probabilities[idx])
+    label = LABEL_NAMES[idx]
+    return label, confidence
 
 
 def main():
@@ -39,9 +41,9 @@ def main():
 
     image_array = preprocess_image(image_path)
     model = load_model()
-    digit, confidence = predict(model, image_array)
+    label, confidence = predict(model, image_array)
 
-    print(f"Predicted digit: {digit}  (confidence: {confidence * 100:.1f}%)")
+    print(f"Predicted character: {label}  (confidence: {confidence * 100:.1f}%)")
 
 
 if __name__ == "__main__":
