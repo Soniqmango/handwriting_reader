@@ -13,7 +13,9 @@ import tensorflow as tf
 EMNIST_URL = "https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip"
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
-LABEL_NAMES = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt'
+# digits 0-9 and uppercase A-Z only (36 classes)
+# dropping the 11 ambiguous lowercase letters improves accuracy
+LABEL_NAMES = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 NUM_CLASSES = len(LABEL_NAMES)
 
 
@@ -74,6 +76,13 @@ def load_data():
     print("Loading EMNIST balanced...")
     x_train, y_train = load_split("train")
     x_test, y_test = load_split("test")
+
+    # keep only digits (0-9) and uppercase letters (10-35)
+    mask_train = y_train <= 35
+    mask_test = y_test <= 35
+    x_train, y_train = x_train[mask_train], y_train[mask_train]
+    x_test, y_test = x_test[mask_test], y_test[mask_test]
+
     print(f"  Train: {len(x_train)}, Test: {len(x_test)}")
 
     x_train = x_train[..., np.newaxis]
@@ -134,7 +143,8 @@ def main():
         batch_size=128,
         validation_data=(x_test, y_test),
         callbacks=[
-            tf.keras.callbacks.EarlyStopping(patience=4, restore_best_weights=True)
+            tf.keras.callbacks.EarlyStopping(patience=6, restore_best_weights=True),
+            tf.keras.callbacks.ReduceLROnPlateau(patience=3, factor=0.5, min_lr=1e-5),
         ],
     )
 

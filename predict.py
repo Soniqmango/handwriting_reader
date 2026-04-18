@@ -8,7 +8,7 @@ from utils.preprocessing import preprocess_image
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "char_model.keras")
 
-LABEL_NAMES = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt'
+LABEL_NAMES = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
 def load_model(model_path=MODEL_PATH):
